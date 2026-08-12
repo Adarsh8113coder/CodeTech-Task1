@@ -8,7 +8,6 @@ import urllib.error
 from collections import defaultdict
 from datetime import datetime, timedelta
 
-# Simple in-memory cache so we don't hit the API twice for the same IP
 _GEO_CACHE = {}
 
 
@@ -22,7 +21,6 @@ def geolocate_ip(ip):
     if ip in _GEO_CACHE:
         return _GEO_CACHE[ip]
 
-    # Skip private/reserved IP ranges — geolocation doesn't apply to these
     private_prefixes = ("10.", "192.168.", "127.", "169.254.")
     if ip.startswith(private_prefixes) or ip.startswith("172."):
         octets = ip.split(".")
@@ -47,8 +45,6 @@ def geolocate_ip(ip):
     _GEO_CACHE[ip] = result
     return result
 
-
-# Regex patterns for common auth.log lines
 FAILED_RE = re.compile(
     r'^(?P<month>\w{3})\s+(?P<day>\d+)\s+(?P<time>\d{2}:\d{2}:\d{2})\s+\S+\s+sshd\[\d+\]:\s+'
     r'Failed password for (invalid user )?(?P<user>\S+) from (?P<ip>[\d.]+)'
@@ -69,8 +65,8 @@ def parse_timestamp(month, day, time_str):
 
 def parse_log(filepath):
     """Read the log file and extract failed/successful login events."""
-    failed_events = []   # list of (datetime, user, ip)
-    success_events = []  # list of (datetime, user, ip)
+    failed_events = []  
+    success_events = []  
 
     with open(filepath, "r", errors="ignore") as f:
         for line in f:
@@ -113,7 +109,7 @@ def detect_bruteforce(failed_events, threshold, window_minutes):
                     "window_start": timestamps[left],
                     "window_end": timestamps[right],
                 })
-                break  # one alert per IP is enough
+                break
     return alerts
 
 
@@ -149,7 +145,7 @@ def detect_foreign_logins(success_events, allowed_countries):
     for ts, user, ip in success_events:
         geo = geolocate_ip(ip)
         if geo is None:
-            continue  # private IP or lookup failed — skip rather than false-alarm
+            continue  
         if geo["countryCode"].upper() not in allowed_set:
             flagged.append({
                 "ip": ip,
@@ -169,7 +165,6 @@ def print_report(failed_events, success_events, bruteforce_alerts, compromise_al
     print(f"\nTotal failed login attempts: {len(failed_events)}")
     print(f"Total successful logins:     {len(success_events)}")
 
-    # Top attacking IPs
     ip_counts = defaultdict(int)
     for _, _, ip in failed_events:
         ip_counts[ip] += 1
@@ -191,7 +186,7 @@ def print_report(failed_events, success_events, bruteforce_alerts, compromise_al
         for user, count in top_users:
             print(f"  {user:<20} {count} attempts")
 
-    # Brute-force alerts
+    # 
     print(f"\n{'-' * 60}")
     print("BRUTE-FORCE ALERTS")
     print("-" * 60)
@@ -202,7 +197,7 @@ def print_report(failed_events, success_events, bruteforce_alerts, compromise_al
     else:
         print("  None detected.")
 
-    # Possible compromise alerts
+
     print(f"\n{'-' * 60}")
     print("POSSIBLE COMPROMISE (success after repeated failures)")
     print("-" * 60)
@@ -213,7 +208,7 @@ def print_report(failed_events, success_events, bruteforce_alerts, compromise_al
     else:
         print("  None detected.")
 
-    # Geolocation alerts
+    #
     if foreign_alerts is not None:
         print(f"\n{'-' * 60}")
         print("LOGINS FROM UNEXPECTED COUNTRIES")
