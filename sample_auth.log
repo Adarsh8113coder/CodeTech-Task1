@@ -11,3 +11,4 @@ Aug 10 09:22:15 myhost sshd[1010]: Accepted password for chuck from 10.0.0.20 po
 Aug 10 10:00:01 myhost sshd[1011]: Failed password for invalid user oracle from 203.0.113.9 port 54000 ssh2
 Aug 10 10:00:03 myhost sshd[1012]: Failed password for invalid user oracle from 203.0.113.9 port 54001 ssh2
 Aug 10 10:00:05 myhost sshd[1013]: Failed password for invalid user postgres from 203.0.113.9 port 54002 ssh2
+Aug 10 11:00:00 myhost sshd[1099]: Accepted password for testuser from 8.8.8.8 port 55000 ssh2
